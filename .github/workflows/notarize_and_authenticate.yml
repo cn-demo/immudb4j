@@ -31,30 +31,13 @@ jobs:
         name: Checkout code
 
       - name: Build the project
-        run: sleep 5 && echo "Project was built" 
+        run: chmod +x ./gradlew && ./gradlew install
 
       - name: VCN generate and notarize BoM for maven projects
         uses: docker://codenotary/vcn:bom-maven
         with:
            args: n git://. --lc-host ${{ secrets.CNIL_HOST }} --lc-port ${{ secrets.CNIL_GRPC_PORT }} --lc-api-key ${{ secrets.CNIL_API_KEY }} --bom --lc-skip-tls-verify
   
-  deploy_expected_failure:
-    # This job can fail, it doens't wait for the repository to be notarized
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-        # Simulates retrieving an artifact, ideally it has been previously notarized
-        - uses: actions/checkout@v2
-          name: Checkout code
-
-
-        - name: VCN authenticate BoM for maven projects
-          uses: docker://codenotary/vcn:bom-maven
-          with:
-            args: a git://. --lc-host ${{ secrets.CNIL_HOST }} --lc-port ${{ secrets.CNIL_GRPC_PORT }} --lc-api-key ${{ secrets.CNIL_API_KEY }} --bom --signerID ghactions --lc-skip-tls-verify
-
-        - name: Deploying after authentication
-          run: echo "Succesful deployment"
 
 
   deploy:
