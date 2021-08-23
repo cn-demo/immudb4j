@@ -31,7 +31,7 @@ jobs:
         name: Checkout code
 
       - name: Build the project
-        run: chmod +x ./gradlew && ./gradlew install && mv builds/pom-default.xml ./pom.xml
+        run: chmod +x ./gradlew && ./gradlew install && ls -alrth && ls -alrth builds
 
       - name: VCN generate and notarize BoM for maven projects
         uses: docker://codenotary/vcn:bom-maven
