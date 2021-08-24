@@ -10,11 +10,17 @@
          - uses: actions/checkout@v2
            name: Checkout code
 
-         - name: Authenticate bil of materials
-           uses: docker://codenotary/vcn:bom-maven
+         - name: VCN Authenticate BOM For Java project
+           uses: codenotary/vcn-authenticate-bom-java-github-action@main
            with:
-             args: a git://. --lc-host ${{ secrets.CNIL_HOST }} --lc-port ${{ secrets.CNIL_GRPC_PORT }} --lc-api-key ${{ secrets.CNIL_API_KEY }} --bom --signerID ghactions --lc-skip-tls-verify
+             asset: git://.
+             cnil_host: ${{ secrets.CNIL_HOST }}
+             cnil_grpc_port: ${{ secrets.CNIL_GRPC_PORT }}
+             cnil_api_key: ${{ secrets.CNIL_API_KEY }}
+             # the signer ID is always required (even if it's the same as the one of the CNIL API key)
+             # - hardcode it here
+             signer_id: ghactions
 
          - name: Deploying after authentication
            # Only runs if authenticate succeeds
-           run: echo "Succesful deployment"
+           run: echo "After authenticating"
