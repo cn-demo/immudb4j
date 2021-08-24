@@ -32,11 +32,15 @@ jobs:
 
       - name: Build the project
         run: chmod +x ./gradlew && ./gradlew install && mv build/poms/pom-default.xml pom.xml
-
-      - name: VCN generate and notarize BoM for maven projects
-        uses: docker://codenotary/vcn:bom-maven
+      
+      - name: Notarize Java Maven project with BoM
+        # uses: codenotary/vcn-notarize-bom-java-github-action@v1.0.0
+        uses: codenotary/vcn-notarize-bom-java-github-action@main
         with:
-           args: n git://. --lc-host ${{ secrets.CNIL_HOST }} --lc-port ${{ secrets.CNIL_GRPC_PORT }} --lc-api-key ${{ secrets.CNIL_API_KEY }} --bom --lc-skip-tls-verify
+          asset: git://.
+          cnil_host: ${{ secrets.CNIL_HOST }}
+          cnil_grpc_port: ${{ secrets.CNIL_GRPC_PORT }}
+          cnil_api_key: ${{ secrets.CNIL_API_KEY }}
   
 
 
@@ -50,9 +54,16 @@ jobs:
           name: Checkout code
 
         - name: VCN Authenticate BOM For Java project
-          uses: docker://codenotary/vcn:bom-maven
+          uses: codenotary/vcn-authenticate-bom-java-github-action@main
           with:
-            args: a git://. --lc-host ${{ secrets.CNIL_HOST }} --lc-port ${{ secrets.CNIL_GRPC_PORT }} --lc-api-key ${{ secrets.CNIL_API_KEY }} --bom --signerID ghactions --lc-skip-tls-verify
+            asset: git://.
+            cnil_host: ${{ secrets.CNIL_HOST }}
+            cnil_grpc_port: ${{ secrets.CNIL_GRPC_PORT }}
+            cnil_api_key: ${{ secrets.CNIL_API_KEY }}
+            # the signer ID is always required (even if it's the same as the one of the CNIL API key)
+            # - hardcode it here
+            signer_id: ghactions
+
 
         - name: Deploying after authentication
           run: echo "Succesful deployment"
